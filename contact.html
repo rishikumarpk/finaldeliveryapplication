@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us - My Choice Supermarket</title>
+
+  <!-- Bootstrap CSS & Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+
+  <style>
+    .btn-primary {
+      background-color: rgb(126,106,255) !important;
+      border: none;
+      border-radius: 12px;
+    }
+
+    .card-title i {
+        font-size: 1.5rem;
+        vertical-align: middle;
+    }
+
+    .card {
+        transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+        transform: scale(1.02);
+    }
+
+    .btn-primary:hover {
+      background-color: rgba(110,88,254,0.8) !important;
+    }
+
+    .card-title {
+      color: rgb(126,106,255);
+    }
+
+    .contact-header {
+      color: rgb(126,106,255);
+    }
+
+    .map-container {
+      overflow: hidden;
+      padding-bottom: 56.25%;
+      position: relative;
+      height: 0;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .map-container iframe {
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <div class="logo">
+      <div class="logo1">
+        <img src="/images/broc.jpg" width="50" height="50" alt="Logo"/>
+      </div>
+      <div class="title">
+        <h4>My Choice Supermarket</h4>
+      </div>
+    </div>
+    <div class="navbar__container">
+      <ul class="navbar__menu">
+        <li class="navbar__item">
+          <a href="http://localhost/login.html" class="navbar__links">HOME</a>
+        </li>
+        <li class="navbar__item">
+          <a href="http://localhost/contact.html" class="navbar__links">CONTACT</a>
+        </li>
+        
+      </ul>
+    </div>
+  </nav>
+
+  <!-- CONTACT SECTION -->
+  <div class="container py-5">
+    <h1 class="contact-header mb-4 text-center">Contact Us</h1>
+    <div class="row g-4">
+      
+      <!-- Address Card -->
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <h5 class="card-title fw-bold">
+              <i class="bi bi-geo-alt-fill me-2"></i>Our Address
+            </h5>
+            <p class="card-text">
+              No 4, Opposite TVH Park Villa,<br>
+              Vinayaka Nagar Main Road,<br>
+              Thoraipakkam - 600097
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone Card -->
+      <div class="col-md-6">
+        <div class="card shadow-sm border-0 h-100">
+          <div class="card-body">
+            <h5 class="card-title fw-bold">
+              <i class="bi bi-telephone-fill me-2"></i>Call Us
+            </h5>
+            <p class="card-text">
+              <a href="tel:9443805100" class="text-decoration-none text-dark">9443805100</a><br>
+              <a href="tel:9445102353" class="text-decoration-none text-dark">9445102353</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Google Maps Embed -->
+    <div class="row mt-5">
+      <div class="col-12">
+        <h4 class="mb-3 text-center">Find Us Here</h4>
+        <div class="map-container">
+          <iframe 
+            src="https://www.google.com/maps?q=No+4,+Opposite+TVH+Park+Villa,+Vinayaka+Nagar+Main+Road,+Thoraipakkam+-+600097&output=embed"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optional Contact Form -->
+    <div class="row mt-5">
+      <div class="col-md-8 mx-auto">
+        <h4 class="mb-3 text-center">Send Us a Message</h4>
+        <form>
+          <div class="mb-3">
+            <label class="form-label">Your Name</label>
+            <input type="text" class="form-control" placeholder="Enter your name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Your Email</label>
+            <input type="email" class="form-control" placeholder="Enter your email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Message</label>
+            <textarea class="form-control" rows="4" placeholder="Type your message..." required></textarea>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

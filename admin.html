@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Order Management</title>
+    <style>
+        :root {
+            --primary-color: rgba(90, 90, 240, 0.7);
+            --secondary-color: rgba(90, 90, 240, 0.7);
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-color: #f8f9fa;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--secondary-color);
+            margin-top: 0;
+        }
+
+        header h1 {
+            color: white;
+            margin: 0;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background-color: white;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 0.8rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f2f5;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        tr.delivered {
+            text-decoration: line-through;
+            color: #888;
+            background-color: #f8f8f8;
+        }
+
+        .order-details {
+            margin-top: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .order-details table {
+            width: 100%;
+            margin-top: 1rem;
+            box-shadow: none;
+        }
+
+        .order-details th, .order-details td {
+            padding: 0.6rem;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        .error {
+            color: var(--danger-color);
+            background-color: #ffebee;
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .loading {
+            color: #666;
+            font-style: italic;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .order-summary {
+            display: flex;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .summary-card {
+            background-color: white;
+            border-radius: 4px;
+            padding: 1rem;
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .summary-card h3 {
+            margin-top: 0;
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .summary-card p {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        select.status-select {
+            padding: 0.4rem;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-pending {
+            color: var(--warning-color);
+            font-weight: bold;
+        }
+
+        .status-out-for-delivery {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .status-delivered {
+            color: var(--success-color);
+            font-weight: bold;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--secondary-color);
+            color: white;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            line-height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            th, td {
+                padding: 0.5rem;
+            }
+            
+            .container {
+                width: 100%;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Admin Panel - Orders</h1>
+        </header>
+        
+        <div id="loading" class="loading">Loading orders...</div>
+        <div id="error" class="error" style="display:none;"></div>
+
+        <div class="order-summary" id="order-stats">
+            <!-- Order stats will be displayed here -->
+        </div>
+
+        <div class="card">
+            <h2>Order Summary</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Date</th>
+                        <th>Total Items</th>
+                        <th>Total Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="order-summary-body">
+                    <!-- Orders will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div id="order-details-container">
+            <!-- Order details will be loaded here -->
+        </div>
+
+        <div class="back-to-top" id="back-to-top">↑</div>
+    </div>
+
+    <script>
+        const orderStatusOptions = ['pending', 'out-for-delivery', 'delivered'];
+
+        async function fetchOrders() //fetch orders from orders.cgi
+        {
+            const loading = document.getElementById('loading');
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '';
+            errorDiv.style.display = 'none';
+            
+            try 
+            {
+                // Fetch real order data from the server
+                const response = await fetch('/cgi-bin/get_orders.cgi');
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (Array.isArray(data)) {
+                    if (data.length === 0) {
+                        displayNoOrders();
+                    } else {
+                        displayOrders(data);
+                        updateOrderStats(data);
+                    }
+                } else if (data.error) {
+                    throw new Error(data.error);
+                } else {
+                    throw new Error('Invalid data format received');
+                }
+                
+                loading.style.display = 'none';
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                loading.style.display = 'none';
+                errorDiv.textContent = `Error loading orders: ${error.message}`;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function updateOrderStats(orders) 
+        {
+            const statsContainer = document.getElementById('order-stats');
+            
+            // Count orders by status
+            const totalOrders = orders.length;
+            const pendingOrders = orders.filter(order => order.status === 'pending').length;
+            const outForDeliveryOrders = orders.filter(order => order.status === 'out-for-delivery').length;
+            const deliveredOrders = orders.filter(order => order.status === 'delivered').length;
+            
+            // Calculate total revenue
+            const totalRevenue = orders.reduce((sum, order) => sum + (order.total || 0), 0);
+            
+            statsContainer.innerHTML = `
+                <div class="summary-card">
+                    <h3>Total Orders</h3>
+                    <p>${totalOrders}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Pending</h3>
+                    <p>${pendingOrders}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Out for Delivery</h3>
+                    <p>${outForDeliveryOrders}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Delivered</h3>
+                    <p>${deliveredOrders}</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Revenue</h3>
+                    <p>₹${totalRevenue.toFixed(2)}</p>
+                </div>
+            `;
+        }
+
+        function displayNoOrders() {
+            const summaryBody = document.getElementById('order-summary-body');
+            summaryBody.innerHTML = '<tr><td colspan="6">No orders found</td></tr>';
+        }
+
+        function displayOrders(orders) {
+            const summaryBody = document.getElementById('order-summary-body');
+            const container = document.getElementById('order-details-container');
+
+            summaryBody.innerHTML = '';
+            container.innerHTML = '';
+
+            orders.forEach((order, index) => {
+                // Create summary row
+                const tr = document.createElement('tr');
+                tr.id = `order-row-${order.orderId}`;
+                if (order.status === 'delivered') {
+                    tr.classList.add('delivered');
+                }
+                
+                const statusDropdown = createStatusDropdown(order.orderId, order.status);
+                
+                tr.innerHTML = `
+                    <td>${order.orderId || 'N/A'}</td>
+                    <td>${order.date ? new Date(order.date).toLocaleString() : 'N/A'}</td>
+                    <td>${calculateTotalItems(order)}</td>
+                    <td>₹${order.total ? order.total.toFixed(2) : '0.00'}</td>
+                    <td id="status-cell-${order.orderId}">${statusDropdown}</td>
+                    <td class="order-actions">
+                        <button onclick="showOrderDetails('${order.orderId}')">View Details</button>
+                    </td>
+                `;
+                summaryBody.appendChild(tr);
+
+                // Create details section
+                const detailsDiv = document.createElement('div');
+                detailsDiv.id = `order-${order.orderId}`;
+                detailsDiv.className = 'order-details card';
+                detailsDiv.style.display = 'none';
+                detailsDiv.innerHTML = generateOrderDetailsHTML(order);
+                container.appendChild(detailsDiv);
+            });
+
+            // After rendering all orders, attach event listeners to status dropdowns
+            orders.forEach(order => {
+                const select = document.getElementById(`status-select-${order.orderId}`);
+                if (select) {
+                    select.addEventListener('change', function() {
+                        updateOrderStatus(order.orderId, this.value);
+                    });
+                }
+            });
+        }
+
+        function createStatusDropdown(orderId, currentStatus) {
+            let html = `<select id="status-select-${orderId}" class="status-select">`;
+            
+            orderStatusOptions.forEach(status => {
+                const selected = status === currentStatus ? 'selected' : '';
+                const statusDisplay = status.replace(/-/g, ' ');
+                html += `<option value="${status}" ${selected}>${statusDisplay.charAt(0).toUpperCase() + statusDisplay.slice(1)}</option>`;
+            });
+            
+            html += `</select>`;
+            return html;
+        }
+
+        async function updateOrderStatus(orderId, newStatus) {
+            const orderRow = document.getElementById(`order-row-${orderId}`);
+            const statusCell = document.getElementById(`status-cell-${orderId}`);
+            const loadingDiv = document.createElement('div');
+            loadingDiv.textContent = 'Updating...';
+            loadingDiv.style.color = '#666';
+            loadingDiv.style.fontStyle = 'italic';
+            
+            try {
+                // Display a loading indicator
+                const statusSelect = document.getElementById(`status-select-${orderId}`);
+                if (statusSelect) {
+                    statusSelect.disabled = true;
+                }
+                statusCell.appendChild(loadingDiv);
+                
+                // Send the update to the server
+                const response = await fetch('/cgi-bin/update_order_status.cgi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        orderId: orderId,
+                        status: newStatus
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Remove the loading indicator
+                statusCell.removeChild(loadingDiv);
+                if (statusSelect) {
+                    statusSelect.disabled = false;
+                }
+                
+                if (!result.success) {
+                    console.error('Failed to update order status:', result.message);
+                    alert(`Failed to update order status: ${result.message}`);
+                    // Reset the dropdown to the previous value
+                    return;
+                }
+                
+                console.log(`Successfully updated order ${orderId} status to ${newStatus}`);
+                
+                // Update UI to reflect the new status
+                if (newStatus === 'delivered') {
+                    orderRow.classList.add('delivered');
+                } else {
+                    orderRow.classList.remove('delivered');
+                }
+                
+                // Update order stats
+                const allSelects = document.querySelectorAll('.status-select');
+                let pendingCount = 0;
+                let outForDeliveryCount = 0;
+                let deliveredCount = 0;
+                
+                allSelects.forEach(select => {
+                    switch(select.value) {
+                        case 'pending':
+                            pendingCount++;
+                            break;
+                        case 'out-for-delivery':
+                            outForDeliveryCount++;
+                            break;
+                        case 'delivered':
+                            deliveredCount++;
+                            break;
+                    }
+                });
+                
+                const statsCards = document.querySelectorAll('.summary-card p');
+                if (statsCards.length >= 4) {
+                    statsCards[1].textContent = pendingCount;
+                    statsCards[2].textContent = outForDeliveryCount;
+                    statsCards[3].textContent = deliveredCount;
+                }
+            } catch (error) {
+                console.error('Error updating order status:', error);
+                alert('Failed to update order status. Please try again.');
+                // Remove the loading indicator
+                if (statusCell.contains(loadingDiv)) {
+                    statusCell.removeChild(loadingDiv);
+                }
+                // Reset the dropdown to the previous value
+                const statusSelect = document.getElementById(`status-select-${orderId}`);
+                if (statusSelect) {
+                    statusSelect.disabled = false;
+                }
+            }
+        }
+
+        function calculateTotalItems(order) {
+            if (order.totalItems) return order.totalItems;
+            if (order.items && Array.isArray(order.items)) {
+                return order.items.reduce((sum, item) => sum + (item.quantity || item.qty || 0), 0);
+            }
+            return 0;
+        }
+
+        function generateOrderDetailsHTML(order) {
+            let statusClass = `status-${order.status}`;
+            let statusText = order.status ? order.status.replace(/-/g, ' ') : 'N/A';
+            statusText = statusText.charAt(0).toUpperCase() + statusText.slice(1);
+            
+            let html = `
+                <h3>Order Details (Order ID: ${order.orderId || 'N/A'})</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p><strong>Date:</strong> ${order.date ? new Date(order.date).toLocaleString() : 'N/A'}</p>
+                    <p><strong>Status:</strong> <span class="${statusClass}">${statusText}</span></p>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Quantity</th>
+                            <th>Unit Price (₹)</th>
+                            <th>Total (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            if (order.items && Array.isArray(order.items)) {
+                order.items.forEach(item => {
+                    const quantity = item.quantity || item.qty || 0;
+                    const unitPrice = item.unitPrice || 0;
+                    html += `
+                        <tr>
+                            <td>${item.name || 'Unknown'}</td>
+                            <td>${quantity}</td>
+                            <td>₹${unitPrice.toFixed(2)}</td>
+                            <td>₹${(quantity * unitPrice).toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            html += `
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" style="text-align: right;"><strong>Subtotal:</strong></td>
+                            <td>₹${order.subtotal ? order.subtotal.toFixed(2) : '0.00'}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align: right;"><strong>Delivery Charges:</strong></td>
+                            <td>₹${order.delivery ? order.delivery.toFixed(2) : '0.00'}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align: right;"><strong>Total Amount:</strong></td>
+                            <td><strong>₹${order.total ? order.total.toFixed(2) : '0.00'}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <div style="margin-top: 1rem; text-align: right;">
+                    <button onclick="hideOrderDetails('${order.orderId}')">Close Details</button>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function showOrderDetails(orderId) {
+            const allDetails = document.querySelectorAll('.order-details');
+            allDetails.forEach(div => div.style.display = 'none');
+
+            const selectedDetails = document.getElementById(`order-${orderId}`);
+            if (selectedDetails) {
+                selectedDetails.style.display = 'block';
+                selectedDetails.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function hideOrderDetails(orderId) {
+            const details = document.getElementById(`order-${orderId}`);
+            if (details) {
+                details.style.display = 'none';
+            }
+        }
+
+        // Back to top functionality
+        window.onscroll = function() {
+            const backToTopButton = document.getElementById("back-to-top");
+            if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
+                backToTopButton.style.display = "block";
+            } else {
+                backToTopButton.style.display = "none";
+            }
+        };
+
+        document.getElementById("back-to-top").addEventListener("click", function() {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+        });
+
+        // Load orders when page loads
+        document.addEventListener('DOMContentLoaded', fetchOrders);
+    </script>
+</body>
+</html>
+

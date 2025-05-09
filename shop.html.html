@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Shop by Category - My Choice Supermarket</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: rgba(90, 90, 240, 0.05);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .search-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between; /* Changed from center to space-between */
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .search-input-container {
+      flex-grow: 1;
+      margin: 0 20px; /* Added margin to create some space on both sides */
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%; /* Make the input use full width of its container */
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+    }
+
+    .icon {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      cursor: pointer;
+      flex-shrink: 0; /* Prevent icons from shrinking */
+    }
+
+    h2 {
+      text-align: center;
+      padding: 30px 0 10px;
+      color: rgb(90, 90, 240);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 300px;
+      background-color: #ffffff;
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card-body {
+      padding: 15px;
+      text-align: center;
+    }
+
+    .card-title {
+      font-weight: 600;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      color: rgb(90, 90, 240);
+    }
+
+    .btn-view {
+      background-color: rgba(90, 90, 240, 0.7);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      transition: background 0.3s;
+    }
+
+    .btn-view:hover {
+      background-color: rgb(90, 90, 240);
+    }
+
+    .category-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding-bottom: 40px;
+    }
+
+    /* New styles for orders dropdown */
+    .nav-container {
+      display: flex;
+      justify-content: flex-end;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 20px;
+    }
+
+    .orders-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .orders-btn {
+      background-color: rgba(90, 90, 240, 0.7);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 8px 16px;
+      cursor: pointer;
+    }
+
+    .orders-content {
+      display: none;
+      position: absolute;
+      right: 0;
+      background-color: #fff;
+      min-width: 300px;
+      max-width: 400px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      z-index: 1;
+      border-radius: 8px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .orders-content.show {
+      display: block;
+    }
+
+    .order-item {
+      padding: 15px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .order-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .order-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .order-details {
+      display: none;
+      margin-top: 10px;
+    }
+
+    .order-details.show {
+      display: block;
+    }
+
+    .order-details table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .order-details th, .order-details td {
+      padding: 8px;
+      border: 1px solid #ddd;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .order-details th {
+      background-color: #f2f2f2;
+    }
+
+    .no-orders {
+      padding: 20px;
+      text-align: center;
+      color: #666;
+    }
+
+    .status-pending {
+      color: #f39c12;
+      font-weight: bold;
+    }
+
+    .status-out-for-delivery {
+      color: #3498db;
+      font-weight: bold;
+    }
+
+    .status-delivered {
+      color: #2ecc71;
+      font-weight: bold;
+    }
+
+    .empty-orders {
+      padding: 20px;
+      text-align: center;
+    }
+
+    
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      max-height: 300px;
+      overflow-y: auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      display: none;
+    }
+
+    .search-result-item {
+      padding: 10px 15px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .search-result-item:hover {
+      background-color: #f5f5f5;
+    }
+
+    .search-result-item .item-name {
+      font-weight: 500;
+    }
+
+    .search-result-item .item-category {
+      color: #777;
+      font-size: 0.9rem;
+    }
+
+    .no-results {
+      padding: 15px;
+      text-align: center;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation bar with orders dropdown -->
+  <div class="nav-container">
+    <div class="orders-dropdown">
+      <button class="orders-btn">My Orders</button>
+      <div class="orders-content" id="orders-dropdown-content">
+        <div id="orders-loading" style="padding: 15px; text-align: center;">Loading orders...</div>
+        <div id="orders-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search bar -->
+  <div class="search-container">
+    <a href="http://localhost/shop.html.html" class="text-decoration-none">
+      <img src="/images/house.png" class="icon">
+    </a>
+    <div class="search-input-container">
+      <input type="text" class="search-input" id="search-input" placeholder="Search products...">
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <a href="http://localhost/cart.html"><img src="/images/cart.png" class="icon" alt="Cart"></a>
+  </div>
+
+  <!-- Title -->
+  <h2>SHOP BY CATEGORIES</h2>
+
+  <!-- Categories -->
+  <div class="category-row">
+    <div class="card">
+      <img src="/images/fruits.jpg" alt="Fruits">
+      <div class="card-body">
+        <div class="card-title">Fruits</div>
+        <a href="http://localhost/cgi-bin/fruits1.cgi"><button class="btn btn-view">View Products</button></a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="/images/vegetables.jpg.jpg" alt="Vegetables">
+      <div class="card-body">
+        <div class="card-title">Vegetables</div>
+        <a href="http://localhost/cgi-bin/vegetables.cgi"><button class="btn btn-view">View Products</button></a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="/images/snacks.jpg" alt="Snacks">
+      <div class="card-body">
+        <div class="card-title">Snacks</div>
+        <a href="http://localhost/cgi-bin/snacks.cgi"><button class="btn btn-view">View Products</button></a>
+      </div>
+    </div>
+  </div>
+
+  <div class="category-row">
+    <div class="card">
+      <img src="/images/dairy.jpg" alt="Dairy Products">
+      <div class="card-body">
+        <div class="card-title">Dairy</div>
+        <a href="http://localhost/cgi-bin/dairy.cgi"><button class="btn btn-view">View Products</button></a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="/images/beverages.jpg" alt="Beverages">
+      <div class="card-body">
+        <div class="card-title">Beverages</div>
+        <a href="http://localhost/cgi-bin/beverages.cgi"><button class="btn btn-view">View Products</button></a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="/images/cleaning.jpg" alt="Cleaning Supplies">
+      <div class="card-body">
+        <div class="card-title">Cleaning</div>
+        <a href="http://localhost/cgi-bin/cleaning.cgi"><button class="btn btn-view">View Products</button></a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Binary Search Tree Implementation
+    class Node {
+      constructor(product, category) {
+        this.product = product;
+        this.category = category;
+        this.left = null;
+        this.right = null;
+      }
+    }
+
+    class BinarySearchTree {
+      constructor() {
+        this.root = null;
+      }
+
+      insert(product, category) {
+        const newNode = new Node(product, category);
+        
+        if (this.root === null) {
+          this.root = newNode;
+          return;
+        }
+        
+        const insertNode = (node, newNode) => {
+          // Compare product names alphabetically
+          if (newNode.product.toLowerCase() < node.product.toLowerCase()) {
+            if (node.left === null) {
+              node.left = newNode;
+            } else {
+              insertNode(node.left, newNode);
+            }
+          } else {
+            if (node.right === null) {
+              node.right = newNode;
+            } else {
+              insertNode(node.right, newNode);
+            }
+          }
+        };
+        
+        insertNode(this.root, newNode);
+      }
+
+      search(query) {
+        query = query.toLowerCase();
+        const results = [];
+        
+        const searchNode = (node, query) => {
+          if (node === null) return;
+          
+          // Search in left subtree
+          searchNode(node.left, query);
+          
+          // Check if current node matches the query
+          if (node.product.toLowerCase().includes(query)) {
+            results.push({
+              product: node.product,
+              category: node.category
+            });
+          }
+          
+          // Search in right subtree
+          searchNode(node.right, query);
+        };
+        
+        searchNode(this.root, query);
+        return results;
+      }
+    }
+
+    // Product data organized by category
+    const productData = {
+      fruits: [
+        "Apple", "Orange", "Banana", "Mango"
+      ],
+      vegetables: [
+        "Tomato", "Potato", "Carrot"
+      ],
+      snacks: [
+        "Butter murukku", "Madras mixture", "Moong dal"
+      ],
+      dairy: [
+        "Milk", "Butter", "Cheese"
+      ],
+      beverages: [
+        "Coke", "Mountain Dew", "Red Bull"
+      ],
+      cleaning: [
+        "Lizol", "Harpic", "Colin"
+      ]
+    };
+
+    // Category URLs
+    const categoryUrls = {
+      fruits: "http://localhost/cgi-bin/fruits1.cgi",
+      vegetables: "http://localhost/cgi-bin/vegetables.cgi",
+      snacks: "http://localhost/cgi-bin/snacks.cgi",
+      dairy: "http://localhost/cgi-bin/dairy.cgi",
+      beverages: "http://localhost/cgi-bin/beverages.cgi",
+      cleaning: "http://localhost/cgi-bin/cleaning.cgi"
+    };
+
+    // Initialize Binary Search Tree with all products
+    const productBST = new BinarySearchTree();
+
+    // Insert all products into the BST
+    for (const [category, products] of Object.entries(productData)) {
+      products.forEach(product => {
+        productBST.insert(product, category);
+      });
+    }
+
+    // Search functionality
+    const searchInput = document.getElementById('search-input');
+    const searchResults = document.getElementById('search-results');
+
+    searchInput.addEventListener('input', function() {
+      const query = this.value.trim();
+      
+      if (query.length < 2) {
+        searchResults.style.display = 'none';
+        return;
+      }
+      
+      const results = productBST.search(query);
+      
+      if (results.length > 0) {
+        let resultsHtml = '';
+        results.forEach(result => {
+          const categoryDisplayName = result.category.charAt(0).toUpperCase() + result.category.slice(1);
+          resultsHtml += `
+            <div class="search-result-item" data-category="${result.category}">
+              <span class="item-name">${result.product}</span>
+              <span class="item-category">${categoryDisplayName}</span>
+            </div>
+          `;
+        });
+        searchResults.innerHTML = resultsHtml;
+        searchResults.style.display = 'block';
+        
+        // Add click event listeners to result items
+        document.querySelectorAll('.search-result-item').forEach(item => {
+          item.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            if (categoryUrls[category]) {
+              window.location.href = categoryUrls[category];
+            }
+          });
+        });
+      } else {
+        searchResults.innerHTML = '<div class="no-results">No products found</div>';
+        searchResults.style.display = 'block';
+      }
+    });
+
+    // Hide search results when clicking outside
+    document.addEventListener('click', function(event) {
+      if (!event.target.closest('.search-input-container')) {
+        searchResults.style.display = 'none';
+      }
+    });
+
+    // Submit search on Enter key
+    searchInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        const query = this.value.trim().toLowerCase();
+        if (query.length >= 2) {
+          const results = productBST.search(query);
+          if (results.length > 0) {
+            // Redirect to the category of the first result
+            const category = results[0].category;
+            if (categoryUrls[category]) {
+              window.location.href = categoryUrls[category];
+            }
+          }
+        }
+      }
+    });
+
+    // Toggle the orders dropdown when the button is clicked
+    document.querySelector('.orders-btn').addEventListener('click', function() {
+      const dropdown = document.getElementById('orders-dropdown-content');
+      dropdown.classList.toggle('show');
+      
+      // Always fetch fresh orders when opening the dropdown
+      if (dropdown.classList.contains('show')) {
+        // Clear previous orders to show loading state
+        document.getElementById('orders-loading').style.display = 'block';
+        document.getElementById('orders-list').innerHTML = '';
+        fetchUserOrders();
+      }
+    });
+
+    // Close the dropdown when clicking outside of it
+    window.addEventListener('click', function(event) {
+      if (!event.target.matches('.orders-btn')) {
+        const dropdown = document.getElementById('orders-dropdown-content');
+        if (dropdown.classList.contains('show')) {
+          dropdown.classList.remove('show');
+        }
+      }
+    });
+
+    // Fetch user orders from the server
+    async function fetchUserOrders() {
+      const ordersList = document.getElementById('orders-list');
+      const loadingElement = document.getElementById('orders-loading');
+      
+      try {
+        // Fetch orders from the server (same endpoint as admin uses)
+        const response = await fetch('/cgi-bin/get_orders.cgi');
+        
+        if (!response.ok) {
+          throw new Error(`Server returned ${response.status}`);
+        }
+        
+        const orders = await response.json();
+        loadingElement.style.display = 'none';
+        
+        if (!orders || orders.length === 0) {
+          ordersList.innerHTML = '<div class="empty-orders">You have no orders yet.</div>';
+          return;
+        }
+        
+        // Sort orders by date (newest first)
+        orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // Generate HTML for each order
+        let ordersHTML = '';
+        orders.forEach(order => {
+          // Make sure status has a default value if it's undefined or null
+          const status = order.status || 'pending';
+          const statusClass = `status-${status}`;
+          const statusText = status.replace(/-/g, ' ');
+          const formattedStatus = statusText.charAt(0).toUpperCase() + statusText.slice(1);
+          
+          ordersHTML += `
+            <div class="order-item" data-order-id="${order.orderId}">
+              <div class="order-header">
+                <span>Order #${order.orderId}</span>
+                <span class="${statusClass}">${formattedStatus}</span>
+              </div>
+              <div>Date: ${new Date(order.date).toLocaleDateString()}</div>
+              <div>Total: ₹${order.total ? order.total.toFixed(2) : '0.00'}</div>
+              <div class="order-details" id="details-${order.orderId}">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Item</th>
+                      <th>Qty</th>
+                      <th>Price</th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+          `;
+          
+          if (order.items && Array.isArray(order.items)) {
+            order.items.forEach(item => {
+              const quantity = item.quantity || item.qty || 0;
+              const unitPrice = item.unitPrice || 0;
+              ordersHTML += `
+                <tr>
+                  <td>${item.name || 'Unknown'}</td>
+                  <td>${quantity}</td>
+                  <td>₹${unitPrice.toFixed(2)}</td>
+                  <td>₹${(quantity * unitPrice).toFixed(2)}</td>
+                </tr>
+              `;
+            });
+          }
+          
+          ordersHTML += `
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="3" style="text-align: right;"><strong>Subtotal:</strong></td>
+                      <td>₹${order.subtotal ? order.subtotal.toFixed(2) : '0.00'}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" style="text-align: right;"><strong>Delivery:</strong></td>
+                      <td>₹${order.delivery ? order.delivery.toFixed(2) : '0.00'}</td>
+                    </tr>
+                    <tr>
+                      <td colspan="3" style="text-align: right;"><strong>Total:</strong></td>
+                      <td><strong>₹${order.total ? order.total.toFixed(2) : '0.00'}</strong></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
+          `;
+        });
+        
+        ordersList.innerHTML = ordersHTML;
+        
+        // Add click listeners to toggle order details
+        document.querySelectorAll('.order-item').forEach(item => {
+          item.addEventListener('click', function(e) {
+            const orderId = this.getAttribute('data-order-id');
+            const details = document.getElementById(`details-${orderId}`);
+            details.classList.toggle('show');
+          });
+        });
+        
+      } catch (error) {
+        console.error('Error fetching orders:', error);
+        loadingElement.style.display = 'none';
+        ordersList.innerHTML = `<div class="no-orders">Error loading orders: ${error.message}</div>`;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Enter Address - My Choice Supermarket</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .btn-primary {
+      background-color: rgb(126,106,255) !important;
+      border: none;
+      border-radius: 12px;
+    }
+    .btn-primary:hover {
+      background-color: rgba(110,88,254,0.8) !important;
+    }
+    .form-control {
+      border-radius: 10px;
+    }
+    .card {
+      border-radius: 20px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .is-invalid {
+      border-color: #dc3545;
+    }
+    .invalid-feedback {
+      color: #dc3545;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm px-4 py-2">
+    <div class="d-flex align-items-center">
+      <img src="/images/broc.jpg" width="50" height="50" alt="Logo">
+      <h4 class="ms-3 mb-0" style="color: rgb(126,106,255);">My Choice Supermarket</h4>
+    </div>
+  </nav>
+
+  <div class="container d-flex justify-content-center align-items-center" style="min-height: 90vh;">
+    <div class="col-md-6 col-lg-5">
+      <div class="card p-5">
+        <h3 class="text-center mb-4" style="color: rgb(126,106,255);">Enter Your Details</h3>
+        <form method="POST" action="/cgi-bin/auth.cgi?action=address" id="addressForm">
+          <input type="hidden" name="email" id="emailInput" value="">
+          
+          <div class="mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" name="name" id="name" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="phone" class="form-label">Phone Number</label>
+            <input type="tel" class="form-control" name="phone" id="phone" required>
+            <div class="invalid-feedback" id="phoneFeedback">Please enter a valid 10-digit phone number.</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="addr1" class="form-label">Address Line 1</label>
+            <input type="text" class="form-control" name="addr1" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="addr2" class="form-label">Address Line 2</label>
+            <input type="text" class="form-control" name="addr2" required>
+          </div>
+          
+          <div class="mb-3">
+            <label for="pincode" class="form-label">Pincode</label>
+            <input type="text" class="form-control" id="pincode" name="pincode" required>
+            <div class="invalid-feedback" id="pincodeFeedback">We do not deliver to this pincode.</div>
+          </div>
+          
+          <div class="d-grid">
+            <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const form = document.getElementById('addressForm');
+      const pincode = document.getElementById('pincode');
+      const pincodeFeedback = document.getElementById('pincodeFeedback');
+      const phone = document.getElementById('phone');
+      const phoneFeedback = document.getElementById('phoneFeedback');
+      const allowedPincodes = ["600097","600090","600094","600095","600098"];
+
+      // Set email from query parameter
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('email')) {
+        document.getElementById('emailInput').value = params.get('email');
+      }
+
+      function validatePincode() {
+        if (!allowedPincodes.includes(pincode.value)) {
+          pincode.classList.add('is-invalid');
+          pincodeFeedback.style.display = 'block';
+          return false;
+        } else {
+          pincode.classList.remove('is-invalid');
+          pincodeFeedback.style.display = 'none';
+          return true;
+        }
+      }
+
+      function validatePhone() {
+        const phoneRegex = /^\d{10}$/;
+        if (!phoneRegex.test(phone.value)) {
+          phone.classList.add('is-invalid');
+          phoneFeedback.style.display = 'block';
+          return false;
+        } else {
+          phone.classList.remove('is-invalid');
+          phoneFeedback.style.display = 'none';
+          return true;
+        }
+      }
+
+      pincode.addEventListener('input', validatePincode);
+      phone.addEventListener('input', validatePhone);
+
+      form.addEventListener('submit', (event) => {
+        const isValidPincode = validatePincode();
+        const isValidPhone = validatePhone();
+        
+        if (!isValidPincode || !isValidPhone) {
+          event.preventDefault();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
